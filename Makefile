@@ -13,20 +13,27 @@ log/container_build.log:  docker-compose.yaml ./docker/*
 
 kitura-shell:
 	${MAKE} start
-	docker-compose exec kitura bash
+	docker-compose exec -T kitura bash
 
 app-build: ${wildcard ./app/Sources/*}
 	${MAKE} start
-	docker-compose exec kitura swift build
+	docker-compose exec -T kitura swift build
 
 app-run: app-build
-	${MAKE} start
-	docker-compose exec kitura swift run
+	${MAKE} stop
+	${MAKE} up
 
 start: container-build
 	docker-compose up -d
 
+logs:
+	docker-compose logs -f
 
+monitor:
+	docker_monitor.sh
+
+up:
+	${MAKE} start logs
 
 stop:
 	docker-compose stop
