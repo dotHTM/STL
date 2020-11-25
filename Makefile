@@ -3,15 +3,30 @@ default:
 	@echo "This is a work in progress..."
 
 container-build: docker-compose.yaml ./docker/*
+	${MAKE} log/container_build.log
+
+log/container_build.log:  docker-compose.yaml ./docker/*
 	docker-compose down
-	docker-compose build
+	mkdir -p log
+	touch log/container_build.log
+	docker-compose build | tee log/container_build.log
 
-app-build:
-	docker-compose stop
-	docker-compose run kitura swift build
+kitura-shell:
+	${MAKE} start
+	docker-compose exec kitura bash
 
-app-run:
+app-build: ${wildcard ./app/Sources/*}
+	${MAKE} start
+	docker-compose exec kitura swift build
+
+app-run: app-build
+	${MAKE} start
 	docker-compose exec kitura swift run
 
-up: container-build
-	docker-compose up
+start: container-build
+	docker-compose up -d
+
+
+
+stop:
+	docker-compose stop
